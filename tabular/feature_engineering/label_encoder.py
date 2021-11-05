@@ -48,7 +48,6 @@ class LabelEncoder:
 
         `{'colname1': {1: 'cat1', 2: 'cat2', ...}, 'colname2': {1: 'cat1', 2: 'cat2', ...}, ...}`
     """
-
     def __init__(
         self,
         columns_to_encode: Optional[List[str]] = None,

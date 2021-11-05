@@ -6,11 +6,12 @@ from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegress
 from sklearn.preprocessing import OneHotEncoder
 from xgboost.sklearn import XGBClassifier, XGBRegressor
 
-__all__ = ['XGBoostFeatureTransformer',
-            'GBDTFeatureTransformer',
-            'LightGBMFeatureTransformer',
-            'CatboostFeatureTransformer',
-        ]
+__all__ = [
+    'XGBoostFeatureTransformer',
+    'GBDTFeatureTransformer',
+    'LightGBMFeatureTransformer',
+    'CatboostFeatureTransformer',
+]
 
 
 class XGBoostFeatureTransformer(BaseEstimator):

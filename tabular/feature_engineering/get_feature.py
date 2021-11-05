@@ -49,13 +49,12 @@ def get_GBDT_total_data(df, target_name, task='classification'):
     cat_col_names = get_category_columns(df, target_name)
     label_encoder = LabelEncoder(cat_col_names)
     total_data = label_encoder.fit_transform(df)
-    clf = LightGBMFeatureTransformer(
-        task=task,
-        categorical_feature=cat_col_names,
-        params={
-            'n_estimators': 100,
-            'max_depth': 3
-        })
+    clf = LightGBMFeatureTransformer(task=task,
+                                     categorical_feature=cat_col_names,
+                                     params={
+                                         'n_estimators': 100,
+                                         'max_depth': 3
+                                     })
     X = total_data.drop(target_name, axis=1)
     y = total_data[target_name]
     clf.fit(X, y)
@@ -72,13 +71,12 @@ def get_groupby_GBDT_total_data(groupby_df,
     cat_col_names = get_category_columns(groupby_df, target_name)
     label_encoder = LabelEncoder(cat_col_names)
     total_data = label_encoder.fit_transform(groupby_df)
-    clf = LightGBMFeatureTransformer(
-        task=task,
-        categorical_feature=cat_col_names,
-        params={
-            'n_estimators': 100,
-            'max_depth': 3
-        })
+    clf = LightGBMFeatureTransformer(task=task,
+                                     categorical_feature=cat_col_names,
+                                     params={
+                                         'n_estimators': 100,
+                                         'max_depth': 3
+                                     })
     X = total_data.drop(target_name, axis=1)
     y = total_data[target_name]
     clf.fit(X, y)
@@ -98,4 +96,3 @@ def select_feature(df, target_name, estimator):
     total_data = X
     total_data[target_name] = y
     return total_data
-

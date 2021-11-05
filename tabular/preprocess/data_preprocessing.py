@@ -1,4 +1,3 @@
-import pandas as pd
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
 
 
@@ -16,7 +15,7 @@ def drop_data(df_all, target_name):
     return df_all
 
 
-def Scaler(df_x, columns=None, method='standard'):
+def scaler(df_x, columns=None, method='standard'):
     """
     Scaler numerical features.
     method: 'standard'、'minmax'、'maxabs' or 'robust'
@@ -27,16 +26,17 @@ def Scaler(df_x, columns=None, method='standard'):
     else:
         num_col_names = columns
     if method == 'standard':
-        scalar = StandardScaler()
+        sc = StandardScaler()
     elif method == 'minmax':
-        scalar = MinMaxScaler()
+        sc = MinMaxScaler()
     elif method == 'maxabs':
-        scalar = MaxAbsScaler()
+        sc = MaxAbsScaler()
     elif method == 'robust':
-        scalar = RobustScaler()
+        sc = RobustScaler()
     else:
-        raise Exception("method not in ['standard', 'minmax', 'maxabs', 'robust']")
-    df_x[num_col_names] = scalar.fit_transform(df_x[num_col_names])
+        raise Exception(
+            "method not in ['standard', 'minmax', 'maxabs', 'robust']")
+    df_x[num_col_names] = sc.fit_transform(df_x[num_col_names])
     return df_x
 
 
@@ -64,7 +64,8 @@ def imputing_numerical_missing_features(df_x, columns=None, method='zero'):
     elif method == 'ffill':
         sub_df = sub_df.fillna(method='ffill', axis=1)
     else:
-        raise Exception("method not in ['zero', 'mean', 'sum', 'mode', 'bfill', 'ffill']")
+        raise Exception(
+            "method not in ['zero', 'mean', 'sum', 'mode', 'bfill', 'ffill']")
     df_x[num_col_names] = sub_df
     return df_x
 
@@ -94,7 +95,7 @@ def imputing_category_missing_features(df_x, columns=None, method='None'):
 def detect_outliers(df_all, column):
     Q1 = df_all[column].quantile(0.25)
     Q3 = df_all[column].quantile(0.75)
-    IQR = 3*(Q3-Q1)
+    IQR = 3 * (Q3 - Q1)
     val_low = Q1 - IQR
     val_up = Q3 + IQR
     return val_low, val_up
@@ -109,15 +110,17 @@ def drop_outliers(df_all, label, columns=None):
         num_col_names = columns
     if type(num_col_names) == str:
         val_low, val_up = detect_outliers(df_all, column=num_col_names)
-        index = df_all[(df_all[num_col_names] < val_low) | (df_all[num_col_names] > val_up)].index
-        df_all = df_all.drop(index).reset_index(inplace=False).drop('index', axis=1)
+        index = df_all[(df_all[num_col_names] < val_low) |
+                       (df_all[num_col_names] > val_up)].index
+        df_all = df_all.drop(index).reset_index(inplace=False).drop('index',
+                                                                    axis=1)
     elif type(num_col_names) == list:
         for col in num_col_names:
             val_low, val_up = detect_outliers(df_all, column=col)
-            index = df_all[(df_all[col] < val_low) | (df_all[col] > val_up)].index
-            df_all = df_all.drop(index).reset_index(inplace=False).drop('index', axis=1)
+            index = df_all[(df_all[col] < val_low) |
+                           (df_all[col] > val_up)].index
+            df_all = df_all.drop(index).reset_index(inplace=False).drop(
+                'index', axis=1)
     else:
         raise Exception("The type of columns must be str or list.")
     return df_all
-
-
