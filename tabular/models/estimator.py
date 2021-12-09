@@ -7,29 +7,29 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.metrics import accuracy_score
 import xgboost as xgb
 import lightgbm as lgb
+from configuration import config
 
 
 class SklearnEstimator(object):
     def __init__(self, name: str, task: str, params=None):
         self.name = name
         self.task = task
-        self.params = params
+        self.params = params if params is not None else config[self.name + "_" + self.task]
         self.classification_dict = {
             "randomforest": RandomForestClassifier(),
             "adaboost": AdaBoostClassifier(),
             "gradientboost": GradientBoostingClassifier(),
             "svm": SVC(),
             "lr": LogisticRegression()
-            }
+        }
         self.regression_dict = {
             "randomforest": RandomForestRegressor(),
             "adaboost": AdaBoostRegressor(),
             "gradientboost": GradientBoostingRegressor(),
             "svm": SVR(),
             "ridge": Ridge()
-            }
+        }
         self.learner = self.get_estimator()
-        self.learner.set_params(**params)
 
     def get_estimator(self):
 
@@ -39,13 +39,15 @@ class SklearnEstimator(object):
             estimator = self.regression_dict.get(self.name)
         else:
             raise Exception("task must be 'classification' or 'regression'")
+        estimator = estimator.set_params(**self.params)
         return estimator
 
     def fit(self, X_data, Y_data, n_fold=1):
         X_data = pd.DataFrame(X_data)
         Y_data = pd.DataFrame(Y_data)
 
-        sk = StratifiedShuffleSplit(n_splits=n_fold, test_size=0.2, train_size=0.8, random_state=2021)
+        sk = StratifiedShuffleSplit(
+            n_splits=n_fold, test_size=0.2, train_size=0.8, random_state=2021)
         scores_train = []
         scores_val = []
         k = 0
@@ -55,8 +57,7 @@ class SklearnEstimator(object):
             train_y = Y_data.iloc[train_ind].values
             val_x = X_data.iloc[val_ind].values
             val_y = Y_data.iloc[val_ind].values
-            print(train_x, train_y)
-            print(self.params)
+
             self.learner.fit(train_x, train_y)
             pred_train = self.learner.predict(train_x)
             pred_val = self.learner.predict(val_x)
@@ -73,7 +74,7 @@ class SklearnEstimator(object):
 
     def predict(self, X_test):
         return self.learner.predict(X_test)
-    
+
     def predict_proba(self, X_test):
         if self.task == "classification":
             return self.learner.predict_proba(X_test)
@@ -82,16 +83,18 @@ class SklearnEstimator(object):
 
 
 class XLGBEstimator(object):
-    def __init__(self, name: str, params=None):
+    def __init__(self, name: str, task: str, params=None):
         self.name = name
-        self.params = params
-    
+        self.task = task
+        self.params = params if params is not None else config[self.name + "_" + self.task]
+
     def fit(self, X_data, Y_data, n_fold=1):
         X_data = pd.DataFrame(X_data)
         Y_data = pd.DataFrame(Y_data)
         print(f'num_class: {Y_data.value_counts()}')
 
-        sk = StratifiedShuffleSplit(n_splits=n_fold, test_size=0.2, train_size=0.8, random_state=2021)
+        sk = StratifiedShuffleSplit(
+            n_splits=n_fold, test_size=0.2, train_size=0.8, random_state=2021)
         scores_train = []
         scores_val = []
 
