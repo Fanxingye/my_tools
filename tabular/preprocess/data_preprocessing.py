@@ -1,4 +1,5 @@
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
+import pandas as pd
 
 
 def drop_data(df_all, target_name):
@@ -124,3 +125,20 @@ def drop_outliers(df_all, label, columns=None):
     else:
         raise Exception("The type of columns must be str or list.")
     return df_all
+
+
+def upsample(data, label, max_num):
+    """ upsample few shot data"""
+    vc = data[label].value_counts()
+    less_than_ten = vc[vc < max_num].index.tolist()
+    data_app = pd.DataFrame()
+    for l in less_than_ten:
+        num = vc[l]
+        n_resample = max_num - num
+        for times in range(n_resample):
+            data_re = data[data[label] == l].sample(n=1)
+            data_app = pd.concat([data_app, data_re], axis=0)
+    data_more = pd.concat([data, data_app], axis=0).reset_index(
+        inplace=False).drop('index', axis=1)
+
+    return data_more
