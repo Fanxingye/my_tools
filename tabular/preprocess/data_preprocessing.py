@@ -1,5 +1,6 @@
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
 import pandas as pd
+import numpy as np
 
 
 def drop_data(df_all, target_name):
@@ -142,3 +143,41 @@ def upsample(data, label, max_num):
         inplace=False).drop('index', axis=1)
 
     return data_more
+
+
+def reduce_memory_usage(df, chunk):
+    start_mem = df.memory_usage().sum() / 1024 ** 2
+    print("Initial Memory chunk: {:.3f}".format(start_mem))
+
+    for col in df.columns:
+        type_ = df[col].dtype
+
+        if str(type_) != "object":
+            if str(type_)[:3] == "int":
+                min_ = df[col].min()
+                max_ = df[col].max()
+
+                if min_ > np.iinfo(np.int8).min and max_ < np.iinfo(np.int8).max:
+                    df[col] = df[col].astype(np.int8)
+                elif min_ > np.iinfo(np.int16).min and max_ < np.iinfo(np.int16).max:
+                    df[col] = df[col].astype(np.int16)
+                elif min_ > np.iinfo(np.int32).min and max_ < np.iinfo(np.int32).max:
+                    df[col] = df[col].astype(np.int32)
+                else:
+                    df[col] = df[col].astype(np.int64)
+            else:
+                if min_ > np.finfo(np.float16).min and max_ < np.finfo(np.float16).max:
+                    df[col] = df[col].astype(np.float16)
+                elif min_ > np.finfo(np.float32).min and max_ < np.finfo(np.float32).max:
+                    df[col] = df[col].astype(np.float32)
+                else:
+                    df[col] = df[col].astype(np.float64)
+        else:
+            df[col] = df[col].astype("category")
+
+    end_mem = df.memory_usage().sum() / 1024 ** 2
+    print("Final Memory chunk: {:.3f}".format(end_mem))
+    print("Reduced by: {:.2f}".format((start_mem - end_mem) / start_mem))
+
+    df.to_pickle(f"chunk_{chunk}.pkl")
+    print(f"chunk_{chunk}.pkl", "saved!")
